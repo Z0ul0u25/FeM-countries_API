@@ -1,0 +1,8 @@
+@mixin theme($themes) {
+	@each $theme, $color in $themes {
+		.#{$theme} {
+			$theme-map: $values;
+			@content;
+		}
+	}
+}

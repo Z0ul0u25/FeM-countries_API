@@ -1,0 +1,13 @@
+@import 'variables';
+@import 'typo';
+@import 'mixins';
+
+html{
+	font-family: "Nunito Sans", sans-serif;
+	font-optical-sizing: auto;
+}
+
+header{
+	position: sticky;
+	top: 0;
+}
