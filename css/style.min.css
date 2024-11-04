@@ -1,1 +1,1 @@
-html{font-family:"Nunito Sans",sans-serif;font-optical-sizing:auto}header{position:-webkit-sticky;position:sticky;top:0}
+@import"https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap";html{font-family:"Nunito Sans",sans-serif;font-optical-sizing:auto}body.light{background-color:#fafafa;color:#111517}body.dark{background-color:#202c37;color:#fff}header{position:-webkit-sticky;position:sticky;top:0}

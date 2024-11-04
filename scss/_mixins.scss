@@ -1,8 +1,18 @@
-@mixin theme($themes) {
-	@each $theme, $color in $themes {
-		.#{$theme} {
-			$theme-map: $values;
+@mixin themeCreation($themes: $themes) {
+	@each $theme, $map in $themes {
+		&.#{$theme} {
+			$theme-map: () !global;
+			@each $key, $value in $map {
+				$value: map-get(map-get($themes, $theme), '#{$key}');
+				$theme-map: map-merge($theme-map, ($key: $value)) !global;
+			}
+
 			@content;
+			$theme-map: null !global;
 		}
 	}
+}
+
+@function theme-value($key) {
+	@return map-get($theme-map, $key);
 }

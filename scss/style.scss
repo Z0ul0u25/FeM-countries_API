@@ -7,6 +7,13 @@ html{
 	font-optical-sizing: auto;
 }
 
+body{
+	@include themeCreation {
+		background-color: theme-value('background');
+		color: theme-value('text');
+	}
+}
+
 header{
 	position: sticky;
 	top: 0;
