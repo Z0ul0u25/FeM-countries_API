@@ -12,7 +12,7 @@ let btn_themeToggle = null;
 let themeIcon = null;
 let divCountries = null;
 let CountriesInfo = null;
-let cur = -1;
+let cur = 0;
 function getAllCountries(region = null) {
     return __awaiter(this, void 0, void 0, function* () {
         let url = "https://restcountries.com/v3.1/all?fields=name,flags,population,region,capital";
@@ -32,20 +32,25 @@ function getOneCountry(name) {
     });
 }
 function displayCountryResume() {
-    if (++cur < CountriesInfo.length) {
-        if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+    if (cur < CountriesInfo.length) {
+        while (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
             let card = document.createElement("div");
             card.classList.add("card");
             card.innerHTML = `
-				<img src="${CountriesInfo[cur].flags.png}" alt="${CountriesInfo[cur].name.common}" />
+				<a href="?name=${CountriesInfo[cur].name.common.replace(' ', "_")}">
+				<div class="card-flag">
+					<img src="${CountriesInfo[cur].flags.png}" alt="${CountriesInfo[cur].name.common} flag" />
+				</div>
 				<div class="card-body">
 					<h2>${CountriesInfo[cur].name.common}</h2>
 					<p>Population: ${CountriesInfo[cur].population}</p>
 					<p>Region: ${CountriesInfo[cur].region}</p>
 					<p>Capital: ${CountriesInfo[cur].capital}</p>
 				</div>
+				</a>
 			`;
             divCountries.appendChild(card);
+            cur++;
         }
     }
     console.log(cur);
@@ -65,7 +70,10 @@ function initialisation() {
     btn_themeToggle.addEventListener("click", swapTheme, false);
     let name = new URLSearchParams(window.location.search);
     if (name.size > 0) {
-        console.log(name.get("name"));
+        console.log(name.get("name").replace("_", " "));
+        getOneCountry(name.get("name").replace("_", " ")).then((data) => {
+            console.log(data);
+        });
     }
     else {
         console.log("INDEX");
@@ -76,7 +84,8 @@ function initialisation() {
             }
         });
         window.onscroll = function () {
-            if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+            if (window.innerHeight + window.scrollY >=
+                document.body.offsetHeight) {
                 displayCountryResume();
             }
         };

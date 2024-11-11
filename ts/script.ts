@@ -30,17 +30,21 @@ async function getOneCountry(name: string): Promise<any> {
 
 function displayCountryResume(): void {
 	if (cur < CountriesInfo.length) {
-		if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+		while ( window.innerHeight + window.scrollY >= document.body.offsetHeight) {
 			let card = document.createElement("div");
 			card.classList.add("card");
 			card.innerHTML = `
-				<img src="${CountriesInfo[cur].flags.png}" alt="${CountriesInfo[cur].name.common}" />
+				<a href="?name=${CountriesInfo[cur].name.common.replace(' ', "_")}">
+				<div class="card-flag">
+					<img src="${CountriesInfo[cur].flags.png}" alt="${CountriesInfo[cur].name.common} flag" />
+				</div>
 				<div class="card-body">
 					<h2>${CountriesInfo[cur].name.common}</h2>
 					<p>Population: ${CountriesInfo[cur].population}</p>
 					<p>Region: ${CountriesInfo[cur].region}</p>
 					<p>Capital: ${CountriesInfo[cur].capital}</p>
 				</div>
+				</a>
 			`;
 
 			divCountries.appendChild(card);
@@ -69,21 +73,27 @@ function initialisation(): void {
 
 	let name = new URLSearchParams(window.location.search);
 	if (name.size > 0) {
-		console.log(name.get("name"));
+		console.log(name.get("name").replace("_", " "));
+		getOneCountry(name.get("name").replace("_", " ")).then((data) => {
+			console.log(data);
+		});
 	} else {
 		console.log("INDEX");
 		getAllCountries().then((data) => {
 			CountriesInfo = data;
 			while (document.body.offsetHeight < window.innerHeight) {
-			displayCountryResume();
+				displayCountryResume();
 			}
 		});
 
 		window.onscroll = function () {
-			if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+			if (
+				window.innerHeight + window.scrollY >=
+				document.body.offsetHeight
+			) {
 				displayCountryResume();
 			}
-		}
+		};
 	}
 }
 
