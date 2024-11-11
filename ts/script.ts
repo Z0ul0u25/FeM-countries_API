@@ -5,7 +5,7 @@ let themeIcon = null;
 let divCountries = null;
 let CountriesInfo = null;
 
-let cur = -1;
+let cur = 0;
 
 async function getAllCountries(region: string = null): Promise<any> {
 	let url =
@@ -29,7 +29,7 @@ async function getOneCountry(name: string): Promise<any> {
 }
 
 function displayCountryResume(): void {
-	if (++cur < CountriesInfo.length) {
+	if (cur < CountriesInfo.length) {
 		if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
 			let card = document.createElement("div");
 			card.classList.add("card");
@@ -44,6 +44,7 @@ function displayCountryResume(): void {
 			`;
 
 			divCountries.appendChild(card);
+			cur++;
 		}
 	}
 	console.log(cur);
