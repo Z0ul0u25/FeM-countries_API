@@ -2,6 +2,7 @@
 
 let btn_themeToggle = null;
 let select_region = null;
+let search_input = null;
 
 let themeIcon = null;
 let divCountries = null;
@@ -9,18 +10,16 @@ let CountriesInfo = null;
 
 let cur = 0;
 
-async function getAllCountries(region: string = null): Promise<any> {
-	console.log(region);
-	let url =
-		"https://restcountries.com/v3.1/all?fields=name,flags,population,region,capital";
+async function getAllCountries(region: string = null, search: string = ""): Promise<any> {
+	let url = "https://restcountries.com/v3.1/all?fields=name,flags,population,region,capital";
 
 	if (region) {
 		url = url.replace("all", `region/${region}`);
 	}
-	console.log(url);
+
 	return fetch(url)
 		.then((response) => response.json())
-		.then((data) => data);
+		.then((data) => data.filter((country) => country.name.common.toLowerCase().includes(search.toLowerCase())));
 }
 
 async function getOneCountry(name: string): Promise<any> {
@@ -32,19 +31,13 @@ async function getOneCountry(name: string): Promise<any> {
 }
 
 function displayCountryResume(): void {
-	if (cur < CountriesInfo.length) {
-		while (
-			window.innerHeight + window.scrollY >=
-			document.body.offsetHeight
-		) {
-			let card = document.createElement("div");
-			card.classList.add("card");
-			card.innerHTML = `
+	while (cur < CountriesInfo.length && window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+		let card = document.createElement("div");
+		card.classList.add("card");
+		card.innerHTML = `
 				<a href="?name=${CountriesInfo[cur].name.common.replace(" ", "_")}">
 				<div class="card-flag">
-					<img src="${CountriesInfo[cur].flags.png}" alt="${
-				CountriesInfo[cur].name.common
-			} flag" />
+					<img src="${CountriesInfo[cur].flags.png}" alt="${CountriesInfo[cur].name.common} flag" />
 				</div>
 				<div class="card-body">
 					<h2>${CountriesInfo[cur].name.common}</h2>
@@ -55,16 +48,15 @@ function displayCountryResume(): void {
 				</a>
 			`;
 
-			divCountries.appendChild(card);
-			cur++;
-		}
+		divCountries.appendChild(card);
+		cur++;
 	}
 }
 
 function filtrerResultats(): void {
-	console.log("Filtre");
 	let region = select_region.value;
-	getAllCountries(region).then((data) => {
+	let search = search_input.value;
+	getAllCountries(region, search).then((data) => {
 		CountriesInfo = data;
 		cur = 0;
 		divCountries.innerHTML = "";
@@ -86,11 +78,13 @@ function initialisation(): void {
 	btn_themeToggle = document.getElementById("theme-toggle");
 	themeIcon = document.getElementById("theme-icon");
 	select_region = document.getElementById("filter-select");
+	search_input = document.getElementById("search-input");
 
 	divCountries = document.getElementById("countries");
 
 	btn_themeToggle.addEventListener("click", swapTheme, false);
 	select_region.addEventListener("change", filtrerResultats, false);
+	search_input.addEventListener("input", filtrerResultats, false);
 
 	let name = new URLSearchParams(window.location.search);
 	if (name.size > 0) {
@@ -106,10 +100,7 @@ function initialisation(): void {
 		});
 
 		window.onscroll = function () {
-			if (
-				window.innerHeight + window.scrollY >=
-				document.body.offsetHeight
-			) {
+			if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
 				displayCountryResume();
 			}
 		};
