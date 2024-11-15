@@ -9,13 +9,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 let btn_themeToggle = null;
+let div_search = null;
 let select_region = null;
 let search_input = null;
 let themeIcon = null;
 let divCountries = null;
 let CountriesInfo = null;
+let CountriesInfoFiltered = null;
 let cur = 0;
-function getAllCountries(region = null, search = "") {
+function getAllCountries(region = null) {
     return __awaiter(this, void 0, void 0, function* () {
         let url = "https://restcountries.com/v3.1/all?fields=name,flags,population,region,capital";
         if (region) {
@@ -23,7 +25,10 @@ function getAllCountries(region = null, search = "") {
         }
         return fetch(url)
             .then((response) => response.json())
-            .then((data) => data.filter((country) => country.name.common.toLowerCase().includes(search.toLowerCase())));
+            .then((data) => data)
+            .catch((err) => {
+            fetch("./data.json").then((response) => response.json());
+        });
     });
 }
 function getOneCountry(name) {
@@ -33,20 +38,20 @@ function getOneCountry(name) {
             .then((data) => data);
     });
 }
-function displayCountryResume() {
-    while (cur < CountriesInfo.length && window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+function displayCountryResume(Countries = CountriesInfo) {
+    while (cur < Countries.length && window.innerHeight + window.scrollY >= document.body.offsetHeight) {
         let card = document.createElement("div");
         card.classList.add("card");
         card.innerHTML = `
-				<a href="?name=${CountriesInfo[cur].name.common.replace(" ", "_")}">
+				<a href="?name=${Countries[cur].name.common.replace(" ", "_")}">
 				<div class="card-flag">
-					<img src="${CountriesInfo[cur].flags.png}" alt="${CountriesInfo[cur].name.common} flag" />
+					<img src="${Countries[cur].flags.png}" alt="${Countries[cur].name.common} flag" />
 				</div>
 				<div class="card-body">
-					<h2>${CountriesInfo[cur].name.common}</h2>
-					<p>Population: ${CountriesInfo[cur].population.toLocaleString()}</p>
-					<p>Region: ${CountriesInfo[cur].region}</p>
-					<p>Capital: ${CountriesInfo[cur].capital}</p>
+					<h2>${Countries[cur].name.common}</h2>
+					<p>Population: ${Countries[cur].population.toLocaleString()}</p>
+					<p>Region: ${Countries[cur].region}</p>
+					<p>Capital: ${Countries[cur].capital}</p>
 				</div>
 				</a>
 			`;
@@ -55,14 +60,12 @@ function displayCountryResume() {
     }
 }
 function filtrerResultats() {
-    let region = select_region.value;
+    // let region = select_region.value;
     let search = search_input.value;
-    getAllCountries(region, search).then((data) => {
-        CountriesInfo = data;
-        cur = 0;
-        divCountries.innerHTML = "";
-        displayCountryResume();
-    });
+    CountriesInfoFiltered = CountriesInfo.filter((country) => country.name.common.toLowerCase().includes(search.toLowerCase()));
+    cur = 0;
+    divCountries.innerHTML = "";
+    displayCountryResume(CountriesInfoFiltered);
 }
 function swapTheme() {
     if (document.body.classList.toggle("dark")) {
@@ -75,6 +78,7 @@ function swapTheme() {
 function initialisation() {
     btn_themeToggle = document.getElementById("theme-toggle");
     themeIcon = document.getElementById("theme-icon");
+    div_search = document.getElementById("search");
     select_region = document.getElementById("filter-select");
     search_input = document.getElementById("search-input");
     divCountries = document.getElementById("countries");
@@ -84,6 +88,7 @@ function initialisation() {
     let name = new URLSearchParams(window.location.search);
     if (name.size > 0) {
         console.log(name.get("name").replace("_", " "));
+        div_search.hidden = true;
         getOneCountry(name.get("name").replace("_", " ")).then((data) => {
             console.log(data);
         });
@@ -92,13 +97,14 @@ function initialisation() {
         console.log("INDEX");
         getAllCountries().then((data) => {
             CountriesInfo = data;
-            displayCountryResume();
+            filtrerResultats();
         });
         window.onscroll = function () {
             if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
                 displayCountryResume();
             }
         };
+        window.addEventListener("resize", displayCountryResume);
     }
 }
 window.addEventListener("DOMContentLoaded", initialisation);
