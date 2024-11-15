@@ -13,7 +13,7 @@ let div_search = null;
 let select_region = null;
 let search_input = null;
 let themeIcon = null;
-let divCountries = null;
+let div_Countries = null;
 let CountriesInfo = null;
 let CountriesInfoFiltered = null;
 let cur = 0;
@@ -33,7 +33,7 @@ function getAllCountries(region = null) {
 }
 function getOneCountry(name) {
     return __awaiter(this, void 0, void 0, function* () {
-        return fetch(`https://restcountries.com/v3.1/name/${name}?fields=nativeName,population,region,subregion,capital,topLevelDomain,currencies,languages,borders,flags`)
+        return fetch(`https://restcountries.com/v3.1/name/${name}?fields=name,nativeName,population,region,subregion,capital,topLevelDomain,currencies,languages,borders,flags`)
             .then((response) => response.json())
             .then((data) => data);
     });
@@ -45,7 +45,7 @@ function displayCountryResume(Countries = CountriesInfo) {
         card.innerHTML = `
 				<a href="?name=${Countries[cur].name.common.replace(" ", "_")}">
 				<div class="card-flag">
-					<img src="${Countries[cur].flags.png}" alt="${Countries[cur].name.common} flag" />
+					<img src="${Countries[cur].flags.svg}" alt="${Countries[cur].name.common} flag" />
 				</div>
 				<div class="card-body">
 					<h2>${Countries[cur].name.common}</h2>
@@ -55,16 +55,25 @@ function displayCountryResume(Countries = CountriesInfo) {
 				</div>
 				</a>
 			`;
-        divCountries.appendChild(card);
+        div_Countries.appendChild(card);
         cur++;
     }
+}
+function displayOneCountry(country) {
+    console.log(country);
+    let flag_div = document.createElement("div");
+    let flag_img = document.createElement("img");
+    flag_img.src = country.flags.svg;
+    flag_img.alt = `${country.name.common} flag`;
+    flag_div.appendChild(flag_img);
+    div_Countries.appendChild(flag_div);
 }
 function filtrerResultats() {
     // let region = select_region.value;
     let search = search_input.value;
     CountriesInfoFiltered = CountriesInfo.filter((country) => country.name.common.toLowerCase().includes(search.toLowerCase()));
     cur = 0;
-    divCountries.innerHTML = "";
+    div_Countries.innerHTML = "";
     displayCountryResume(CountriesInfoFiltered);
 }
 function swapTheme() {
@@ -81,7 +90,7 @@ function initialisation() {
     div_search = document.getElementById("search");
     select_region = document.getElementById("filter-select");
     search_input = document.getElementById("search-input");
-    divCountries = document.getElementById("countries");
+    div_Countries = document.getElementById("countries");
     btn_themeToggle.addEventListener("click", swapTheme, false);
     select_region.addEventListener("change", filtrerResultats, false);
     search_input.addEventListener("input", filtrerResultats, false);
@@ -90,7 +99,7 @@ function initialisation() {
         console.log(name.get("name").replace("_", " "));
         div_search.hidden = true;
         getOneCountry(name.get("name").replace("_", " ")).then((data) => {
-            console.log(data);
+            displayOneCountry(data[0]);
         });
     }
     else {
@@ -104,7 +113,7 @@ function initialisation() {
                 displayCountryResume();
             }
         };
-        window.addEventListener("resize", displayCountryResume);
+        window.addEventListener("resize", (ev) => displayCountryResume(), false); // Had to add (ev) to avoid error
     }
 }
 window.addEventListener("DOMContentLoaded", initialisation);

@@ -6,14 +6,14 @@ let select_region: HTMLSelectElement = null;
 let search_input: HTMLInputElement = null;
 
 let themeIcon: HTMLImageElement = null;
-let divCountries: HTMLElement = null;
-let CountriesInfo = null;
-let CountriesInfoFiltered = null;
+let div_Countries: HTMLElement = null;
+let CountriesInfo: Array<any> = null;
+let CountriesInfoFiltered: Array<any>= null;
 
-let cur = 0;
+let cur: number= 0;
 
 async function getAllCountries(region: string = null): Promise<any> {
-	let url = "https://restcountries.com/v3.1/all?fields=name,flags,population,region,capital";
+	let url: string = "https://restcountries.com/v3.1/all?fields=name,flags,population,region,capital";
 
 	if (region) {
 		url = url.replace("all", `region/${region}`);
@@ -29,20 +29,20 @@ async function getAllCountries(region: string = null): Promise<any> {
 
 async function getOneCountry(name: string): Promise<any> {
 	return fetch(
-		`https://restcountries.com/v3.1/name/${name}?fields=nativeName,population,region,subregion,capital,topLevelDomain,currencies,languages,borders,flags`
+		`https://restcountries.com/v3.1/name/${name}?fields=name,nativeName,population,region,subregion,capital,topLevelDomain,currencies,languages,borders,flags`
 	)
 		.then((response) => response.json())
 		.then((data) => data);
 }
 
-function displayCountryResume(Countries = CountriesInfo): void {
+function displayCountryResume(Countries: Array<any> = CountriesInfo): void {
 	while (cur < Countries.length && window.innerHeight + window.scrollY >= document.body.offsetHeight) {
-		let card = document.createElement("div");
+		let card: HTMLElement = document.createElement("div");
 		card.classList.add("card");
 		card.innerHTML = `
 				<a href="?name=${Countries[cur].name.common.replace(" ", "_")}">
 				<div class="card-flag">
-					<img src="${Countries[cur].flags.png}" alt="${Countries[cur].name.common} flag" />
+					<img src="${Countries[cur].flags.svg}" alt="${Countries[cur].name.common} flag" />
 				</div>
 				<div class="card-body">
 					<h2>${Countries[cur].name.common}</h2>
@@ -53,18 +53,31 @@ function displayCountryResume(Countries = CountriesInfo): void {
 				</a>
 			`;
 
-		divCountries.appendChild(card);
+		div_Countries.appendChild(card);
 		cur++;
 	}
 }
 
+function displayOneCountry(country): void {
+	console.log(country);
+
+	let flag_div: HTMLElement = document.createElement("div");
+	let flag_img: HTMLImageElement = document.createElement("img");
+
+	flag_img.src = country.flags.svg;
+	flag_img.alt = `${country.name.common} flag`;
+
+	flag_div.appendChild(flag_img);
+	div_Countries.appendChild(flag_div);
+}
+
 function filtrerResultats(): void {
 	// let region = select_region.value;
-	let search = search_input.value;
+	let search: string = search_input.value;
 
 	CountriesInfoFiltered = CountriesInfo.filter((country) => country.name.common.toLowerCase().includes(search.toLowerCase()))
 	cur = 0;
-	divCountries.innerHTML = "";
+	div_Countries.innerHTML = "";
 	displayCountryResume(CountriesInfoFiltered);
 }
 
@@ -85,18 +98,18 @@ function initialisation(): void {
 	select_region = <HTMLSelectElement>document.getElementById("filter-select");
 	search_input = <HTMLInputElement>document.getElementById("search-input");
 
-	divCountries = document.getElementById("countries");
+	div_Countries = document.getElementById("countries");
 
 	btn_themeToggle.addEventListener("click", swapTheme, false);
 	select_region.addEventListener("change", filtrerResultats, false);
 	search_input.addEventListener("input", filtrerResultats, false);
 
-	let name = new URLSearchParams(window.location.search);
+	let name: URLSearchParams = new URLSearchParams(window.location.search);
 	if (name.size > 0) {
 		console.log(name.get("name").replace("_", " "));
 		div_search.hidden = true;
 		getOneCountry(name.get("name").replace("_", " ")).then((data) => {
-			console.log(data);
+			displayOneCountry(data[0]);
 		});
 	} else {
 		console.log("INDEX");
@@ -110,7 +123,7 @@ function initialisation(): void {
 				displayCountryResume();
 			}
 		};
-		window.addEventListener("resize", displayCountryResume);
+		window.addEventListener("resize", (ev) => displayCountryResume(), false); // Had to add (ev) to avoid error
 	}
 }
 
