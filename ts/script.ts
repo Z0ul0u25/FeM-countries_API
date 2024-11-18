@@ -4,6 +4,7 @@ let btn_themeToggle: HTMLElement = null;
 let div_search: HTMLElement = null;
 let select_region: HTMLSelectElement = null;
 let search_input: HTMLInputElement = null;
+let button_return: HTMLElement = null;
 
 let themeIcon: HTMLImageElement = null;
 let div_content: HTMLElement = null;
@@ -14,17 +15,18 @@ let cur: number= 0;
 
 async function getAllCountries(region: string = null): Promise<any> {
 	let url: string = "https://restcountries.com/v3.1/all?fields=name,flags,population,region,capital";
+	// let url: string = "DEBUG";
 
 	if (region) {
 		url = url.replace("all", `region/${region}`);
 	}
 
-	return fetch(url)
-		.then((response) => response.json())
-		.then((data) => data)
-		.catch((err) => {
-			fetch("./data.json").then((response) => response.json());
-		});
+	let response = await fetch(url);
+	if (!response.ok) {
+		response = await fetch("../data.json");
+	}
+
+	return response.json();
 }
 
 async function getOneCountry(name: string): Promise<any> {
@@ -35,20 +37,21 @@ async function getOneCountry(name: string): Promise<any> {
 		.then((data) => data);
 }
 
-function displayCountryResume(Countries: Array<any> = CountriesInfo): void {
-	while (cur < Countries.length && window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+function displayCountryResume(): void {
+
+	while (cur < CountriesInfoFiltered.length && window.innerHeight + window.scrollY >= document.body.offsetHeight) {
 		let card: HTMLElement = document.createElement("div");
 		card.classList.add("card");
 		card.innerHTML = `
-				<a href="?name=${Countries[cur].name.common.replace(" ", "_")}">
+				<a href="?name=${CountriesInfoFiltered[cur].name.common.replace(" ", "_")}">
 				<div class="card-flag">
-					<img src="${Countries[cur].flags.svg}" alt="${Countries[cur].name.common} flag" />
+					<img src="${CountriesInfoFiltered[cur].flags.svg}" alt="${CountriesInfoFiltered[cur].name.common} flag" />
 				</div>
 				<div class="card-body">
-					<h2>${Countries[cur].name.common}</h2>
-					<p>Population: ${Countries[cur].population.toLocaleString()}</p>
-					<p>Region: ${Countries[cur].region}</p>
-					<p>Capital: ${Countries[cur].capital}</p>
+					<h2>${CountriesInfoFiltered[cur].name.common}</h2>
+					<p>Population: ${CountriesInfoFiltered[cur].population.toLocaleString()}</p>
+					<p>Region: ${CountriesInfoFiltered[cur].region}</p>
+					<p>Capital: ${CountriesInfoFiltered[cur].capital}</p>
 				</div>
 				</a>
 			`;
@@ -67,35 +70,40 @@ function displayOneCountry(country): void {
 	let info_ul: HTMLElement = document.createElement("ul");
 	info_ul.innerHTML = `
 		<li><h2>${country.name.common}</h2></li>
-		<li>Native Name: ${country.name.common}</li>
+		<li>Native Name: ${country.name.nativeName}</li>
 		<li>Population: ${country.population.toLocaleString()}</li>
 		<li>Region: ${country.region}</li>
 		<li>Sub Region: ${country.subregion}</li>
 		<li>Capital: ${country.capital}</li>
 		<li>Top Level Domain: ${country.topLevelDomain}</li>
-		<li>Currencies: ${Object.keys(country.currencies).map((currency: any) => currency.name).join(", ")}</li>
-		<li>Languages: ${Object.keys(country.languages).map((language: any) => language.name).join(", ")}</li>
+		<li>Currencies: ${Object.values(country.currencies).map((currency: any) => currency.name).join(", ")}</li>
+		<li>Languages: ${Object.values(country.languages).map((language: any) => language).join(", ")}</li>
 		<li>Borders: ${country.borders.join(", ")}</li>
 	`
 
 	flag_img.src = country.flags.svg;
 	flag_img.alt = `${country.name.common} flag`;
 
+	flag_div.classList.add("flag");
 	flag_div.appendChild(flag_img);
 	info_div.appendChild(info_ul);
 
+	div_content.classList.add("info");
 	div_content.appendChild(flag_div);
 	div_content.appendChild(info_div);
 }
 
 function filtrerResultats(): void {
-	// let region = select_region.value;
+	console.log("Filtrer");
 	let search: string = search_input.value;
 
-	CountriesInfoFiltered = CountriesInfo.filter((country) => country.name.common.toLowerCase().includes(search.toLowerCase()))
+	CountriesInfoFiltered = CountriesInfo.filter((country) => country.name.common.toLowerCase().includes(search.toLowerCase()));
+	if (select_region.value != "all") {
+		CountriesInfoFiltered = CountriesInfoFiltered.filter((country) => country.region == select_region.value);
+	}
 	cur = 0;
 	div_content.innerHTML = "";
-	displayCountryResume(CountriesInfoFiltered);
+	displayCountryResume();
 }
 
 function swapTheme(): void {
@@ -114,6 +122,7 @@ function initialisation(): void {
 	div_search = document.getElementById("search");
 	select_region = <HTMLSelectElement>document.getElementById("filter-select");
 	search_input = <HTMLInputElement>document.getElementById("search-input");
+	button_return = document.getElementById("button_return");
 
 	div_content = document.getElementById("content");
 
@@ -124,15 +133,15 @@ function initialisation(): void {
 	let name: URLSearchParams = new URLSearchParams(window.location.search);
 	if (name.size > 0) {
 		div_content.classList.add("unique");
-		div_content.classList.remove("gallery");
 
 		div_search.hidden = true;
+		button_return.hidden = false;
 		getOneCountry(name.get("name").replace("_", " ")).then((data) => {
+			console.log(data);
 			displayOneCountry(data[0]);
 		});
 	} else {
 		console.log("INDEX");
-		div_content.classList.remove("unique");
 		div_content.classList.add("gallery");
 
 		getAllCountries().then((data) => {

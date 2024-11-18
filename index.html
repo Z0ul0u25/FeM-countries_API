@@ -12,7 +12,9 @@
 
 <body class="dark">
 	<header>
-		<a href="./"><h1>Where in the world?</h1></a>
+		<a href="./">
+			<h1>Where in the world?</h1>
+		</a>
 		<div id="theme-toggle">
 			<img id="theme-icon" src="images/moon-full.svg" alt="Dark mode enabled">
 			<span> Dark mode</span>
@@ -24,7 +26,7 @@
 			<div id="filter">
 				<span>Filter by Region</span>
 				<select id="filter-select">
-					<option value="">All</option>
+					<option value="all">All</option>
 					<option value="Africa">Africa</option>
 					<option value="Americas">Americas</option>
 					<option value="Asia">Asia</option>
@@ -34,8 +36,15 @@
 				</select>
 			</div>
 		</div>
-		<div></div>
-		<div id="content"></div>
+
+		<a href="?" id="button_return" hidden>
+			<div class="button">
+				<span>&LeftArrow; Back</span>
+			</div>
+		</a>
+
+		<div id="content">
+		</div>
 	</main>
 	<footer></footer>
 </body>

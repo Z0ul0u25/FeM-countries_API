@@ -16,3 +16,8 @@
 @function theme-value($key) {
 	@return map-get($theme-map, $key);
 }
+
+@mixin element(){
+	background-color: theme-value('elements');
+	color: theme-value('text');
+}
