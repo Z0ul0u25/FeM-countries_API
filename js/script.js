@@ -13,7 +13,7 @@ let div_search = null;
 let select_region = null;
 let search_input = null;
 let themeIcon = null;
-let div_Countries = null;
+let div_content = null;
 let CountriesInfo = null;
 let CountriesInfoFiltered = null;
 let cur = 0;
@@ -55,25 +55,40 @@ function displayCountryResume(Countries = CountriesInfo) {
 				</div>
 				</a>
 			`;
-        div_Countries.appendChild(card);
+        div_content.appendChild(card);
         cur++;
     }
 }
 function displayOneCountry(country) {
-    console.log(country);
     let flag_div = document.createElement("div");
     let flag_img = document.createElement("img");
+    let info_div = document.createElement("div");
+    let info_ul = document.createElement("ul");
+    info_ul.innerHTML = `
+		<li><h2>${country.name.common}</h2></li>
+		<li>Native Name: ${country.name.common}</li>
+		<li>Population: ${country.population.toLocaleString()}</li>
+		<li>Region: ${country.region}</li>
+		<li>Sub Region: ${country.subregion}</li>
+		<li>Capital: ${country.capital}</li>
+		<li>Top Level Domain: ${country.topLevelDomain}</li>
+		<li>Currencies: ${Object.keys(country.currencies).map((currency) => currency.name).join(", ")}</li>
+		<li>Languages: ${Object.keys(country.languages).map((language) => language.name).join(", ")}</li>
+		<li>Borders: ${country.borders.join(", ")}</li>
+	`;
     flag_img.src = country.flags.svg;
     flag_img.alt = `${country.name.common} flag`;
     flag_div.appendChild(flag_img);
-    div_Countries.appendChild(flag_div);
+    info_div.appendChild(info_ul);
+    div_content.appendChild(flag_div);
+    div_content.appendChild(info_div);
 }
 function filtrerResultats() {
     // let region = select_region.value;
     let search = search_input.value;
     CountriesInfoFiltered = CountriesInfo.filter((country) => country.name.common.toLowerCase().includes(search.toLowerCase()));
     cur = 0;
-    div_Countries.innerHTML = "";
+    div_content.innerHTML = "";
     displayCountryResume(CountriesInfoFiltered);
 }
 function swapTheme() {
@@ -90,13 +105,14 @@ function initialisation() {
     div_search = document.getElementById("search");
     select_region = document.getElementById("filter-select");
     search_input = document.getElementById("search-input");
-    div_Countries = document.getElementById("countries");
+    div_content = document.getElementById("content");
     btn_themeToggle.addEventListener("click", swapTheme, false);
     select_region.addEventListener("change", filtrerResultats, false);
     search_input.addEventListener("input", filtrerResultats, false);
     let name = new URLSearchParams(window.location.search);
     if (name.size > 0) {
-        console.log(name.get("name").replace("_", " "));
+        div_content.classList.add("unique");
+        div_content.classList.remove("gallery");
         div_search.hidden = true;
         getOneCountry(name.get("name").replace("_", " ")).then((data) => {
             displayOneCountry(data[0]);
@@ -104,6 +120,8 @@ function initialisation() {
     }
     else {
         console.log("INDEX");
+        div_content.classList.remove("unique");
+        div_content.classList.add("gallery");
         getAllCountries().then((data) => {
             CountriesInfo = data;
             filtrerResultats();
