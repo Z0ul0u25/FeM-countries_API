@@ -22,9 +22,19 @@ async function getAllCountries(region = null) {
     return response.json();
 }
 async function getOneCountry(name) {
-    return fetch(`https://restcountries.com/v3.1/name/${name}?fields=name,nativeName,population,region,subregion,capital,topLevelDomain,currencies,languages,borders,flags`)
+    let response = await fetch(`https://restcountries.com/v3.1/name/${name}?fields=name,nativeName,population,region,subregion,capital,topLevelDomain,currencies,languages,borders,flags`)
         .then((response) => response.json())
         .then((data) => data);
+    return response;
+}
+//  fetch(`https://restcountries.com/v3.1/alpha/${cca3}?fields=name`)
+async function getBorderCountryFullName(cca3) {
+    let url = `https://restcountries.com/v3.1/alpha/${cca3}?fields=name`;
+    let response = await fetch(url)
+        .then((response) => response.json())
+        .then((data) => {
+        document.getElementById("borders").innerHTML += `<li class="link_country"><a href="?name=${data.name.common.replace(" ", "_")}">${data.name.common}</li>`;
+    });
 }
 function displayCountryResume() {
     while (cur < CountriesInfoFiltered.length && window.innerHeight + window.scrollY >= document.body.offsetHeight) {
@@ -54,9 +64,20 @@ function displayOneCountry(country) {
     let flag_img = document.createElement("img");
     let info_div = document.createElement("div");
     let info_ul = document.createElement("ul");
+    let nativeNamesObj = {};
+    for (const NAME in country.name.nativeName) {
+        nativeNamesObj[country.languages[NAME]] = country.name.nativeName[NAME].common;
+    }
     info_ul.innerHTML = `
 		<li><h2>${country.name.common}</h2></li>
-		<li>Native Name: ${country.name.nativeName}</li>
+		<li>Native Name:
+			<ul>
+				<li>${Object.keys(nativeNamesObj)
+        .map((key) => key + ": " + nativeNamesObj[key])
+        .join("</li><li>")}
+				</li>
+			</ul>
+		</li>
 		<li>Population: ${country.population.toLocaleString()}</li>
 		<li>Region: ${country.region}</li>
 		<li>Sub Region: ${country.subregion}</li>
@@ -68,8 +89,10 @@ function displayOneCountry(country) {
 		<li>Languages: ${Object.values(country.languages)
         .map((language) => language)
         .join(", ")}</li>
-		<li>Borders: ${country.borders.join(", ")}</li>
-	`;
+		<li>Borders: <ul id="borders"></ul></li>`;
+    country.borders.forEach((border) => {
+        getBorderCountryFullName(border);
+    });
     flag_img.src = country.flags.svg;
     flag_img.alt = `${country.name.common} flag`;
     flag_div.classList.add("flag");
@@ -116,7 +139,6 @@ function initialisation() {
         div_search.hidden = true;
         button_return.hidden = false;
         getOneCountry(name.get("name").replace("_", " ")).then((data) => {
-            console.log(data);
             displayOneCountry(data[0]);
         });
     }
