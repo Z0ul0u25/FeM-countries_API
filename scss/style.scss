@@ -88,6 +88,7 @@ a {
 
 #button_return:not([hidden]) {
 	display: block;
+
 	div {
 		max-width: fit-content;
 	}
@@ -101,9 +102,12 @@ a {
 #content {
 	&.gallery {
 		display        : flex;
-		gap            : 32px;
+		row-gap        : 64px;
 		justify-content: space-between;
-		flex-wrap      : wrap;
+		flex-flow      : row wrap;
+
+		min-width: min-content;
+		margin   : 0 auto;
 
 		.card {
 			width: 320px;
@@ -121,6 +125,11 @@ a {
 				max-width : 100%;
 				max-height: 100%;
 			}
+		}
+
+		&::after {
+			content: '';
+			width  : 320px;
 		}
 	}
 
@@ -160,5 +169,5 @@ a {
 }
 
 .card-flag {
-	background: radial-gradient(circle, rgba(0,0,0,1) 0%, rgba(255,0,0,0) 90%);
+	background: radial-gradient(circle, rgba(0, 0, 0, 1) 0%, rgba(255, 0, 0, 0) 90%);
 }

@@ -60,8 +60,12 @@ function displayOneCountry(country) {
 		<li>Sub Region: ${country.subregion}</li>
 		<li>Capital: ${country.capital}</li>
 		<li>Top Level Domain: ${country.topLevelDomain}</li>
-		<li>Currencies: ${Object.values(country.currencies).map((currency) => currency.name).join(", ")}</li>
-		<li>Languages: ${Object.values(country.languages).map((language) => language).join(", ")}</li>
+		<li>Currencies: ${Object.values(country.currencies)
+        .map((currency) => currency.name)
+        .join(", ")}</li>
+		<li>Languages: ${Object.values(country.languages)
+        .map((language) => language)
+        .join(", ")}</li>
 		<li>Borders: ${country.borders.join(", ")}</li>
 	`;
     flag_img.src = country.flags.svg;
@@ -121,7 +125,8 @@ function initialisation() {
             filtrerResultats();
         });
         window.onscroll = function () {
-            if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight &&
+                cur < CountriesInfoFiltered.length) {
                 displayCountryResume();
             }
         };

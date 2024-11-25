@@ -9,9 +9,9 @@ let button_return: HTMLElement = null;
 let themeIcon: HTMLImageElement = null;
 let div_content: HTMLElement = null;
 let CountriesInfo: Array<any> = null;
-let CountriesInfoFiltered: Array<any>= null;
+let CountriesInfoFiltered: Array<any> = null;
 
-let cur: number= 0;
+let cur: number = 0;
 
 async function getAllCountries(region: string = null): Promise<any> {
 	let url: string = "https://restcountries.com/v3.1/all?fields=name,flags,population,region,capital";
@@ -38,7 +38,6 @@ async function getOneCountry(name: string): Promise<any> {
 }
 
 function displayCountryResume(): void {
-
 	while (cur < CountriesInfoFiltered.length && window.innerHeight + window.scrollY >= document.body.offsetHeight) {
 		let card: HTMLElement = document.createElement("div");
 		card.classList.add("card");
@@ -62,7 +61,6 @@ function displayCountryResume(): void {
 }
 
 function displayOneCountry(country): void {
-
 	let flag_div: HTMLElement = document.createElement("div");
 	let flag_img: HTMLImageElement = document.createElement("img");
 
@@ -76,10 +74,14 @@ function displayOneCountry(country): void {
 		<li>Sub Region: ${country.subregion}</li>
 		<li>Capital: ${country.capital}</li>
 		<li>Top Level Domain: ${country.topLevelDomain}</li>
-		<li>Currencies: ${Object.values(country.currencies).map((currency: any) => currency.name).join(", ")}</li>
-		<li>Languages: ${Object.values(country.languages).map((language: any) => language).join(", ")}</li>
+		<li>Currencies: ${Object.values(country.currencies)
+			.map((currency: any) => currency.name)
+			.join(", ")}</li>
+		<li>Languages: ${Object.values(country.languages)
+			.map((language: any) => language)
+			.join(", ")}</li>
 		<li>Borders: ${country.borders.join(", ")}</li>
-	`
+	`;
 
 	flag_img.src = country.flags.svg;
 	flag_img.alt = `${country.name.common} flag`;
@@ -97,7 +99,9 @@ function filtrerResultats(): void {
 	console.log("Filtrer");
 	let search: string = search_input.value;
 
-	CountriesInfoFiltered = CountriesInfo.filter((country) => country.name.common.toLowerCase().includes(search.toLowerCase()));
+	CountriesInfoFiltered = CountriesInfo.filter((country) =>
+		country.name.common.toLowerCase().includes(search.toLowerCase())
+	);
 	if (select_region.value != "all") {
 		CountriesInfoFiltered = CountriesInfoFiltered.filter((country) => country.region == select_region.value);
 	}
@@ -150,7 +154,10 @@ function initialisation(): void {
 		});
 
 		window.onscroll = function () {
-			if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+			if (
+				window.innerHeight + window.scrollY >= document.body.offsetHeight &&
+				cur < CountriesInfoFiltered.length
+			) {
 				displayCountryResume();
 			}
 		};
