@@ -103,7 +103,8 @@ a {
 	&.gallery {
 		display        : flex;
 		row-gap        : 64px;
-		justify-content: space-between;
+		padding-bottom : 64px;
+		justify-content: space-around;
 		flex-flow      : row wrap;
 
 		min-width: min-content;
@@ -116,9 +117,25 @@ a {
 				width : 320px;
 				height: 213px;
 
+				background: radial-gradient(circle, rgba(0, 0, 0, 1) 0%, rgba(255, 0, 0, 0) 90%);
+
 				display        : flex;
 				justify-content: center;
 				align-items    : center;
+			}
+
+			.card-body{
+
+				padding: 0 32px;
+
+				ul {
+					padding: 0;
+				}
+
+				li {
+					list-style-type: none;
+					margin         : 0.5rem 0;
+				}
 			}
 
 			img {
@@ -162,12 +179,4 @@ a {
 	border       : none;
 	border-radius: 5px;
 	cursor       : pointer;
-}
-
-.card-body {
-	padding: 0 32px;
-}
-
-.card-flag {
-	background: radial-gradient(circle, rgba(0, 0, 0, 1) 0%, rgba(255, 0, 0, 0) 90%);
 }

@@ -48,9 +48,11 @@ function displayCountryResume(): void {
 				</div>
 				<div class="card-body">
 					<h2>${CountriesInfoFiltered[cur].name.common}</h2>
-					<p>Population: ${CountriesInfoFiltered[cur].population.toLocaleString()}</p>
-					<p>Region: ${CountriesInfoFiltered[cur].region}</p>
-					<p>Capital: ${CountriesInfoFiltered[cur].capital}</p>
+					<ul>
+					<li>Population: ${CountriesInfoFiltered[cur].population.toLocaleString()}</li>
+					<li>Region: ${CountriesInfoFiltered[cur].region}</li>
+					<li>Capital: ${CountriesInfoFiltered[cur].capital}</li>
+					</ul>
 				</div>
 				</a>
 			`;
@@ -136,6 +138,7 @@ function initialisation(): void {
 
 	let name: URLSearchParams = new URLSearchParams(window.location.search);
 	if (name.size > 0) {
+		// Country page
 		div_content.classList.add("unique");
 
 		div_search.hidden = true;
@@ -145,7 +148,7 @@ function initialisation(): void {
 			displayOneCountry(data[0]);
 		});
 	} else {
-		console.log("INDEX");
+		// Index page
 		div_content.classList.add("gallery");
 
 		getAllCountries().then((data) => {
