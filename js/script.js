@@ -107,7 +107,6 @@ function displayOneCountry(country) {
                 if (data.length > 1) {
                     data = data.filter((country) => border.includes(country.cca3))[0];
                 }
-                console.log(data);
                 document.getElementById("borders").innerHTML += `<li class="link_country"><a href="?name=${data.cca3}">${data.name.common}</a></li>`;
             });
         });
@@ -122,7 +121,6 @@ function displayOneCountry(country) {
     div_content.appendChild(info_div);
 }
 function filtrerResultats() {
-    console.log("Filtrer");
     let search = search_input.value;
     CountriesInfoFiltered = CountriesInfo.filter((country) => country.name.common.toLowerCase().includes(search.toLowerCase()));
     if (select_region.value != "all") {

@@ -127,7 +127,6 @@ function displayOneCountry(country): void {
 				if (data.length > 1) {
 					data = data.filter((country) => border.includes(country.cca3))[0];
 				}
-				console.log(data);
 				document.getElementById(
 					"borders"
 				).innerHTML += `<li class="link_country"><a href="?name=${data.cca3}">${
@@ -150,7 +149,6 @@ function displayOneCountry(country): void {
 }
 
 function filtrerResultats(): void {
-	console.log("Filtrer");
 	let search: string = search_input.value;
 
 	CountriesInfoFiltered = CountriesInfo.filter((country) =>

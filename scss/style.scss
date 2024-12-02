@@ -123,8 +123,13 @@ a {
 
 	&>* {
 		width    : 33vw;
+		max-width: 45%;
 		min-width: $default-width;
 		margin-bottom: 16px;
+	}
+
+	#filter-select {
+		max-width: $default-width;
 	}
 }
 
