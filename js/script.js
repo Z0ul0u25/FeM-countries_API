@@ -13,35 +13,48 @@ async function getAllCountries(region = null) {
     let url = "https://restcountries.com/v3.1/all?fields=name,flags,population,region,capital";
     // let url: string = "DEBUG";
     if (region) {
+        // replace "all" by the region filter
         url = url.replace("all", `region/${region}`);
     }
     let response = await fetch(url);
+    // Fallback to local data if API is down
     if (!response.ok) {
         response = await fetch("../data.json");
     }
     return response.json();
 }
 async function getOneCountry(name) {
-    let response = await fetch(`https://restcountries.com/v3.1/name/${name}?fields=name,nativeName,population,region,subregion,capital,topLevelDomain,currencies,languages,borders,flags`)
-        .then((response) => response.json())
-        .then((data) => data);
-    return response;
+    let url = `https://restcountries.com/v3.1/name/${name}?fields=name,nativeName,population,region,subregion,capital,topLevelDomain,currencies,languages,borders,flags`;
+    // let url: string = "DEBUG";
+    let response = await fetch(url);
+    if (!response.ok) {
+        response = await fetch("../data.json")
+            .then((response) => response.json())
+            .then((data) => {
+            return data.filter((country) => country.name.common == name);
+        });
+    }
+    return response.json();
 }
-//  fetch(`https://restcountries.com/v3.1/alpha/${cca3}?fields=name`)
 async function getBorderCountryFullName(cca3) {
     let url = `https://restcountries.com/v3.1/alpha/${cca3}?fields=name`;
-    let response = await fetch(url)
-        .then((response) => response.json())
-        .then((data) => {
-        document.getElementById("borders").innerHTML += `<li class="link_country"><a href="?name=${data.name.common.replace(" ", "_")}">${data.name.common}</li>`;
-    });
+    // let url: string = "DEBUG";
+    let response = await fetch(url);
+    if (!response.ok) {
+        response = await fetch("../data.json")
+            .then((response) => response.json())
+            .then((data) => {
+            return data.filter((country) => cca3.includes(country.cca3)).map((country) => country.name.common);
+        });
+    }
+    return response.json();
 }
 function displayCountryResume() {
     while (cur < CountriesInfoFiltered.length && window.innerHeight + window.scrollY >= document.body.offsetHeight) {
         let card = document.createElement("div");
         card.classList.add("card");
         card.innerHTML = `
-				<a href="?name=${CountriesInfoFiltered[cur].name.common.replace(" ", "_")}">
+				<a href="?name=${CountriesInfoFiltered[cur].name.common.replaceAll(" ", "_")}">
 				<div class="card-flag">
 					<img src="${CountriesInfoFiltered[cur].flags.svg}" alt="${CountriesInfoFiltered[cur].name.common} flag" />
 				</div>
@@ -88,11 +101,19 @@ function displayOneCountry(country) {
         .join(", ")}</li>
 		<li>Languages: ${Object.values(country.languages)
         .map((language) => language)
-        .join(", ")}</li>
-		<li>Borders: <ul id="borders"></ul></li>`;
-    country.borders.forEach((border) => {
-        getBorderCountryFullName(border);
-    });
+        .join(", ")}</li>`;
+    if (country.borders.length == 0) {
+        info_ul.innerHTML += `<li>Borders: None</li>`;
+    }
+    else {
+        info_ul.innerHTML += `<li>Borders: <ul id="borders"></ul></li>`;
+        country.borders.forEach((border) => {
+            getBorderCountryFullName(border).then((data) => {
+                console.log(data.name.common);
+                document.getElementById("borders").innerHTML += `<li class="link_country"><a href="?name=${data.name.common.replaceAll(" ", "_")}">${data.name.common}</a></li>`;
+            });
+        });
+    }
     flag_img.src = country.flags.svg;
     flag_img.alt = `${country.name.common} flag`;
     flag_div.classList.add("flag");
@@ -138,7 +159,7 @@ function initialisation() {
         div_content.classList.add("unique");
         div_search.hidden = true;
         button_return.hidden = false;
-        getOneCountry(name.get("name").replace("_", " ")).then((data) => {
+        getOneCountry(name.get("name").replaceAll("_", " ")).then((data) => {
             displayOneCountry(data[0]);
         });
     }
