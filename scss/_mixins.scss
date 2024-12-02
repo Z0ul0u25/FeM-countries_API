@@ -20,4 +20,5 @@
 @mixin element(){
 	background-color: theme-value('elements');
 	color: theme-value('text');
+	box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);
 }
