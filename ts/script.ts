@@ -14,8 +14,9 @@ let CountriesInfoFiltered: Array<any> = null;
 let cur: number = 0;
 
 async function getAllCountries(region: string = null): Promise<any> {
-	let url: string = "https://restcountries.com/v3.1/all?fields=name,flags,population,region,capital";
-	// let url: string = "DEBUG";
+	let url: string = "https://restcountries.com/v3.1/all?fields=name,flags,population,region,capital,cca3";
+	// Uncomment the following line to test the fallback
+	// url = "DEBUG";
 
 	if (region) {
 		// replace "all" by the region filter
@@ -31,35 +32,30 @@ async function getAllCountries(region: string = null): Promise<any> {
 	return response.json();
 }
 
-async function getOneCountry(name: string): Promise<any> {
-	let url: string = `https://restcountries.com/v3.1/name/${name}?fields=name,nativeName,population,region,subregion,capital,topLevelDomain,currencies,languages,borders,flags`;
-	// let url: string = "DEBUG";
+async function getOneCountry(cca3: string): Promise<any> {
+	let url: string = `https://restcountries.com/v3.1/alpha/${cca3}?fields=name,nativeName,population,region,subregion,capital,topLevelDomain,currencies,languages,borders,flags`;
+	// Uncomment the following line to test the fallback
+	// url = "DEBUG";
 
 	let response = await fetch(url);
 	if (!response.ok) {
-		response = await fetch("../data.json")
-			.then((response) => response.json())
-			.then((data) => {
-				return data.filter((country) => country.name.common == name);
-			});
+		response = await fetch("../data.json");
 	}
 
 	return response.json();
 }
 
 async function getBorderCountryFullName(cca3: string): Promise<any> {
-	let url: string = `https://restcountries.com/v3.1/alpha/${cca3}?fields=name`;
-	// let url: string = "DEBUG";
+	let url: string = `https://restcountries.com/v3.1/alpha/${cca3}?fields=name,cca3`;
+	// Uncomment the following line to test the fallback
+	// url = "DEBUG";
 
 	let response = await fetch(url);
 
 	if (!response.ok) {
-		response = await fetch("../data.json")
-			.then((response) => response.json())
-			.then((data) => {
-				return data.filter((country) => cca3.includes(country.cca3)).map((country) => country.name.common);
-			});
+		response = await fetch("../data.json");
 	}
+
 	return response.json();
 }
 
@@ -68,7 +64,7 @@ function displayCountryResume(): void {
 		let card: HTMLElement = document.createElement("div");
 		card.classList.add("card");
 		card.innerHTML = `
-				<a href="?name=${CountriesInfoFiltered[cur].name.common.replaceAll(" ", "_")}">
+				<a href="?name=${CountriesInfoFiltered[cur].cca3}">
 				<div class="card-flag">
 					<img src="${CountriesInfoFiltered[cur].flags.svg}" alt="${CountriesInfoFiltered[cur].name.common} flag" />
 				</div>
@@ -128,10 +124,13 @@ function displayOneCountry(country): void {
 		info_ul.innerHTML += `<li>Borders: <ul id="borders"></ul></li>`;
 		country.borders.forEach((border: string) => {
 			getBorderCountryFullName(border).then((data) => {
-				console.log(data.name.common);
+				if (data.length > 1) {
+					data = data.filter((country) => border.includes(country.cca3))[0];
+				}
+				console.log(data);
 				document.getElementById(
 					"borders"
-				).innerHTML += `<li class="link_country"><a href="?name=${data.name.common.replaceAll(" ", "_")}">${
+				).innerHTML += `<li class="link_country"><a href="?name=${data.cca3}">${
 					data.name.common
 				}</a></li>`;
 			});
@@ -189,15 +188,18 @@ function initialisation(): void {
 	select_region.addEventListener("change", filtrerResultats, false);
 	search_input.addEventListener("input", filtrerResultats, false);
 
-	let name: URLSearchParams = new URLSearchParams(window.location.search);
-	if (name.size > 0) {
+	let cca3: URLSearchParams = new URLSearchParams(window.location.search);
+	if (cca3.size > 0) {
 		// Country page
 		div_content.classList.add("unique");
 
 		div_search.hidden = true;
 		button_return.hidden = false;
-		getOneCountry(name.get("name").replaceAll("_", " ")).then((data) => {
-			displayOneCountry(data[0]);
+		getOneCountry(cca3.get("name")).then((data) => {
+			if (data.length > 1) {
+				data = data.filter((country) => cca3.get("name").includes(country.cca3))[0];
+			}
+			displayOneCountry(data);
 		});
 	} else {
 		// Index page
